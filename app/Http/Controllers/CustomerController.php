@@ -57,7 +57,12 @@ class CustomerController extends Controller
                 "exp" => time() + 86400
             );
 
-            $jwt = JWT::encode($token, env('JWT_SECRET'), 'HS256');
+            $jwtSecret = config('app.jwt_secret');
+            if (!$jwtSecret) {
+                return response()->json(['error' => 'JWT configuration error'], 500);
+            }
+
+            $jwt = JWT::encode($token, $jwtSecret, 'HS256');
 
             unset($customer->password);
             Customer::where('email', $loggedCustomer['email'])->update([
@@ -164,7 +169,7 @@ class CustomerController extends Controller
             );
 
 
-            $forgetPassLink = env('APP_URL') . '/forget-password/' . $token->token;
+            $forgetPassLink = config('app.url') . '/forget-password/' . $token->token;
 
             $mailData = [
                 'title' => 'request forget password',

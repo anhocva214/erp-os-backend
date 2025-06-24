@@ -872,9 +872,9 @@ class ProductController extends Controller
 
 function getCookies($request): array
 {
-    $secret = env('JWT_SECRET');
+    $secret = config('app.jwt_secret');
     $token = $request->bearerToken();
-    if (empty($token)) {
+    if (empty($token) || !$secret) {
         return [];
     } else {
         try {

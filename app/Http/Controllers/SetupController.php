@@ -13,7 +13,7 @@ class SetupController extends Controller
 {
     public function index()
     {
-        if (env('APP_SETUP') === 'true') {
+        if (config('app.app_setup') === 'true' || config('app.app_setup') === true) {
             return redirect('/');
         }
         return view('setup');

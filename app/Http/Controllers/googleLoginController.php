@@ -28,8 +28,13 @@ class googleLoginController extends Controller
             $customer = Customer::with("role")->where('googleId', $decodedToken->sub)->first();
 
             if ($customer) {
+                $jwtSecret = config('app.jwt_secret');
+                if (!$jwtSecret) {
+                    return response()->json(['error' => 'JWT configuration error'], 500);
+                }
+
                 $accessToken = accessToken($customer->id, $customer->role->name, $customer->roleId);
-                $jwt = JWT::encode($accessToken, env('JWT_SECRET'), 'HS256');
+                $jwt = JWT::encode($accessToken, $jwtSecret, 'HS256');
                 Customer::where('id', $customer->id)->update(['isLogin' => 'true']);
                 unset($customer->password);
                 unset($customer->isLogin);
@@ -58,8 +63,13 @@ class googleLoginController extends Controller
             $customer->isLogin = 'true';
             $customer->save();
 
+            $jwtSecret = config('app.jwt_secret');
+            if (!$jwtSecret) {
+                return response()->json(['error' => 'JWT configuration error'], 500);
+            }
+
             $accessToken = accessToken($customer->id, $customer->role->name, $customer->roleId);
-            $jwt = JWT::encode($accessToken, env('JWT_SECRET'), 'HS256');
+            $jwt = JWT::encode($accessToken, $jwtSecret, 'HS256');
             unset($customer->password);
             $customer->token = $jwt;
             $converted = arrayKeysToCamelCase($customer->toArray());

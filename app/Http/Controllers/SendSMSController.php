@@ -27,7 +27,11 @@ class SendSMSController extends Controller
                 $to = $request->phone;
                 $message = $request->message;
                     
-                $token = env('BBSMS_TOKEN');
+                $token = config('app.bbsms_token');
+
+                if (!$token) {
+                    return response()->json(['error' => 'SMS configuration error'], 500);
+                }
                 $url = "http://api.greenweb.com.bd/api.php?json";
     
                     $data = array(

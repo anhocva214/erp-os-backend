@@ -14,7 +14,7 @@ class RefreshTokenController extends Controller
     {
         try {
 
-        
+
             $refreshToken = $request->cookie('refreshToken');
             if (!$refreshToken) {
                 return response()->json([
@@ -22,8 +22,12 @@ class RefreshTokenController extends Controller
                 ], 403);
             }
 
-            $secret = env('REFRESH_SECRET');
-            $refreshTokenDecoded = JWT::decode($refreshToken, new Key($secret, 'HS384'));
+            $refreshSecret = config('app.refresh_secret');
+            if (!$refreshSecret) {
+                return response()->json(['error' => 'JWT configuration error'], 500);
+            }
+
+            $refreshTokenDecoded = JWT::decode($refreshToken, new Key($refreshSecret, 'HS384'));
 
             $user = Users::where('id', $refreshTokenDecoded->sub)->with('role:id,name')->first();
             if (!$user) {
@@ -45,7 +49,12 @@ class RefreshTokenController extends Controller
                 "exp" => time() + 86400
             );
 
-            $jwt = JWT::encode($token, env('JWT_SECRET'), 'HS256');
+            $jwtSecret = config('app.jwt_secret');
+            if (!$jwtSecret) {
+                return response()->json(['error' => 'JWT configuration error'], 500);
+            }
+
+            $jwt = JWT::encode($token, $jwtSecret, 'HS256');
             $cookie = Cookie::make('refreshToken', $refreshToken);
 
             return response()->json([

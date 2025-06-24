@@ -13,7 +13,7 @@ function sendEmail($emailConfig, $customerEmail, $mailData, $cc = null, $bcc = n
         'mail.mailers.smtp.encryption' => $emailConfig->emailEncryption,
         'mail.mailers.smtp.username' => $emailConfig->emailUser,
         'mail.mailers.smtp.password' => $emailConfig->emailPass,
-        'mail.mailers.smtp.local_domain' => env('MAIL_EHLO_DOMAIN'),
+        'mail.mailers.smtp.local_domain' => config('mail.mailers.smtp.local_domain'),
         'mail.from.address' => $emailConfig->emailUser,
         'mail.from.name' => $emailConfig->emailConfigName,
     ]);

@@ -28,6 +28,14 @@ class UsersController extends Controller
                 return response()->json(['error' => 'username or password is incorrect'], 401);
             }
 
+            // Validate JWT secrets
+            $jwtSecret = config('app.jwt_secret');
+            $refreshSecret = config('app.refresh_secret');
+
+            if (!$jwtSecret || !$refreshSecret) {
+                return response()->json(['error' => 'JWT configuration error'], 500);
+            }
+
             $token = [
                 "sub" => $user->id,
                 "roleId" => $user['role']['id'],
@@ -41,8 +49,8 @@ class UsersController extends Controller
                 "exp" => time() + 86400 * 30
             ];
 
-            $refreshJwt = JWT::encode($refreshToken, env('REFRESH_SECRET'), 'HS384');
-            $jwt = JWT::encode($token, env('JWT_SECRET'), 'HS256');
+            $refreshJwt = JWT::encode($refreshToken, $refreshSecret, 'HS384');
+            $jwt = JWT::encode($token, $jwtSecret, 'HS256');
 
             $cookie = Cookie::make('refreshToken', $refreshJwt, 60 * 24 * 30)->withPath('/')->withHttpOnly()->withSameSite('None')->withSecure();
 
